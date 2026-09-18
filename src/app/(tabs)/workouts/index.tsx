@@ -1,11 +1,9 @@
-import { Link } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Workouts() {
   return (
     <View style={styles.container}>
-      <Link href="/">Home</Link>
-      <Link href="/progress">Home</Link>
+      <Text>Workouts</Text>
     </View>
   );
 }
