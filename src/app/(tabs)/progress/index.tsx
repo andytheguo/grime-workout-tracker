@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { styles } from "@/constants/styles";
+import { Text, View } from "react-native";
 
 export default function Progress() {
   return (
@@ -7,11 +8,3 @@ export default function Progress() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
-  }
-});
