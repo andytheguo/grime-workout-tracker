@@ -1,7 +1,11 @@
+import { initDatabase } from "@/data/database";
 import { Stack } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
 
 export default function RootLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}/>
+    <SQLiteProvider databaseName="tracker" onInit={initDatabase} options={{ useNewConnection: false }}>
+      <Stack screenOptions={{ headerShown: false }}/>
+    </SQLiteProvider>
   );
 }

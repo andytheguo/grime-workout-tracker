@@ -1,4 +1,4 @@
-import { styles } from "@/app/constants/styles";
+import { styles } from "@/constants/styles";
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
