@@ -1,6 +1,6 @@
 import { styles } from "@/constants/styles";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export default function Settings() {
   const router = useRouter();

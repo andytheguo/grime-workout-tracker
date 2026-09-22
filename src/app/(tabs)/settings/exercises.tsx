@@ -1,13 +1,25 @@
 import { styles } from "@/constants/styles";
-import { createExercise } from "@/data/database";
+import { createExercise, deleteExercise, getExercises } from "@/data/database";
+import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 export default function Exercises() {
+  const router = useRouter();
+
   const [exerciseName, setExerciseName] = useState("");
+  const [exercises, setExercises] = useState<{ id: number, name: string }[]>([]);
 
   const db = useSQLiteContext();
+
+  useEffect(() => {
+    async function setup() {
+      const result = await getExercises(db);
+      setExercises(result);
+    }
+    setup();
+  }, [db]);
 
   return (
     <View style={styles.container}>
@@ -25,11 +37,39 @@ export default function Exercises() {
       />
 
       <Pressable style={styles.button} onPress={async () => {
-        await createExercise(db, exerciseName);
-        setExerciseName("");
+        async function addExercise() {
+          const name = exerciseName.trim();
+
+          if (name === "") return;
+
+          await createExercise(db, exerciseName);
+          setExerciseName("");
+
+          const result = await getExercises(db);
+          setExercises(result);
+        }
+
+        addExercise();
       }}>
         <Text style={styles.text}>Add Exercise</Text>
       </Pressable>
+
+      {exercises.map((exercise) => (
+        <View key={exercise.id}>
+          <Pressable onPress={() => router.navigate(`/settings/${exercise.id}`)}>
+            <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
+          </Pressable>
+
+          <Pressable style={styles.button} onPress={async () => {
+            await deleteExercise(db, exercise.id);
+
+            const result = await getExercises(db);
+            setExercises(result);
+          }}>
+            <Text style={styles.text}>Delete</Text>
+          </Pressable>
+        </View>
+      ))}
     </View>
    );
 }

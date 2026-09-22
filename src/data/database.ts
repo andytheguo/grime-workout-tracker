@@ -40,3 +40,21 @@ export async function createExercise(db: SQLite.SQLiteDatabase, name: string) {
 
   return result.lastInsertRowId;
 }
+
+export async function getExercises(db: SQLite.SQLiteDatabase) {
+  const result = await db.getAllAsync <{ id: number, name: string }>("SELECT id, name FROM exercises ORDER BY name");
+
+  return result;
+}
+
+export async function updateExercse(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
+  await db.runAsync("UPDATE exercises SET name = ?, where id = ?", options);
+}
+
+export async function deleteExercise(db: SQLite.SQLiteDatabase, id: number) {
+  await db.runAsync("DELETE FROM exercises where id = ?", id);
+}
+
+export async function getExercise(db: SQLite.SQLiteDatabase, id: number) {
+  return await db.getFirstAsync<{ id: number, name: string }>("SELECT id, name FROM exercises WHERE id = ?", id);
+}
