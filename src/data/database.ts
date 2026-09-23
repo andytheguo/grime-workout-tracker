@@ -35,7 +35,7 @@ export async function initDatabase(db: SQLite.SQLiteDatabase) {
 export async function createExercise(db: SQLite.SQLiteDatabase, name: string) {
   const result = await db.runAsync("INSERT INTO exercises (name) VALUES (?)", name);
 
-  // TODO: TEST
+  // TEST
   console.log("Added exercise: " + name);
 
   return result.lastInsertRowId;
@@ -48,13 +48,42 @@ export async function getExercises(db: SQLite.SQLiteDatabase) {
 }
 
 export async function updateExercse(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
-  await db.runAsync("UPDATE exercises SET name = ?, where id = ?", options);
+  const result = await db.runAsync("UPDATE exercises SET name = ? WHERE id = ?", options.name, options.id);
+
+  // TEST
+  console.log("No. exercises changed: " + result.changes);
 }
 
 export async function deleteExercise(db: SQLite.SQLiteDatabase, id: number) {
-  await db.runAsync("DELETE FROM exercises where id = ?", id);
+  await db.runAsync("DELETE FROM exercises WHERE id = ?", id);
 }
 
 export async function getExercise(db: SQLite.SQLiteDatabase, id: number) {
   return await db.getFirstAsync<{ id: number, name: string }>("SELECT id, name FROM exercises WHERE id = ?", id);
+}
+
+export async function createRoutine(db: SQLite.SQLiteDatabase, name: string) {
+  const result = await db.runAsync("INSERT INTO routines (name) VALUES (?)", name);
+
+  // TEST
+  console.log("Added routine: " + name);
+
+  return result.lastInsertRowId;
+}
+
+export async function getRoutines(db: SQLite.SQLiteDatabase) {
+  const result = await db.getAllAsync <{ id: number, name: string }>("SELECT id, name FROM routines ORDER BY name");
+
+  return result;
+}
+
+export async function updateRoutines(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
+  const result = await db.runAsync("UPDATE routines SET name = ? WHERE id = ?", options.name, options.id);
+
+  // TEST
+  console.log("No. routines changed: " + result.changes);
+}
+
+export async function deleteRoutine(db: SQLite.SQLiteDatabase, id: number) {
+  await db.runAsync("DELETE FROM routines WHERE id = ?", id);
 }

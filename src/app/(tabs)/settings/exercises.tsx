@@ -1,8 +1,8 @@
 import { styles } from "@/constants/styles";
 import { createExercise, deleteExercise, getExercises } from "@/data/database";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 export default function Exercises() {
@@ -13,13 +13,15 @@ export default function Exercises() {
 
   const db = useSQLiteContext();
 
-  useEffect(() => {
-    async function setup() {
-      const result = await getExercises(db);
-      setExercises(result);
-    }
-    setup();
-  }, [db]);
+  useFocusEffect(
+    useCallback(() => {
+      async function setup() {
+        const result = await getExercises(db);
+        setExercises(result);
+      }
+      setup();
+    }, [db])
+  );
 
   return (
     <View style={styles.container}>
