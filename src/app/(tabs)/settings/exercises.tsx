@@ -38,7 +38,7 @@ export default function Exercises() {
         }}
       />
 
-      <Pressable style={styles.button} onPress={async () => {
+      <Pressable style={styles.button} onPress={() => {
         async function addExercise() {
           const name = exerciseName.trim();
 

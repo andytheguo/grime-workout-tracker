@@ -5,7 +5,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
-export default function Edit() {
+export default function EditExercise() {
   const { id } = useLocalSearchParams();
 
   const [exercise, setExercise] = useState<{ id: number, name: string } | null>(null);

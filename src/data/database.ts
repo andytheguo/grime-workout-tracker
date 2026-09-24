@@ -72,12 +72,12 @@ export async function createRoutine(db: SQLite.SQLiteDatabase, name: string) {
 }
 
 export async function getRoutines(db: SQLite.SQLiteDatabase) {
-  const result = await db.getAllAsync <{ id: number, name: string }>("SELECT id, name FROM routines ORDER BY name");
+  const result = await db.getAllAsync<{ id: number, name: string }>("SELECT id, name FROM routines ORDER BY name");
 
   return result;
 }
 
-export async function updateRoutines(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
+export async function updateRoutine(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
   const result = await db.runAsync("UPDATE routines SET name = ? WHERE id = ?", options.name, options.id);
 
   // TEST
@@ -86,4 +86,34 @@ export async function updateRoutines(db: SQLite.SQLiteDatabase, options: { id: n
 
 export async function deleteRoutine(db: SQLite.SQLiteDatabase, id: number) {
   await db.runAsync("DELETE FROM routines WHERE id = ?", id);
+}
+
+export async function getRoutine(db: SQLite.SQLiteDatabase, id: number) {
+  return await db.getFirstAsync<{ id: number, name: string }>("SELECT id, name FROM routines WHERE id = ?", id);
+}
+
+export async function createRoutineExercise(db: SQLite.SQLiteDatabase, routineId: number, exerciseId: number) {
+  await db.runAsync("INSERT INTO routine_exercises (routine_id, exercise_id) VALUES (?, ?)", routineId, exerciseId);
+}
+
+export async function getRoutineExercises(db: SQLite.SQLiteDatabase, routineId: number) {
+  const result = await db.getAllAsync<{ id: number, exerciseName: string }>(`
+    SELECT routine_exercises.id, exercises.name
+    FROM routine_exercises
+    JOIN exercises ON routine_exercises.exercises_id = exercises.id
+    WHERE routine_exercises.routine_id = ?
+    ORDER BY exercises.name
+    `,
+    routineId
+  );
+
+  return result;
+}
+
+export async function updateRoutineExercise(db: SQLite.SQLiteDatabase, options: { id: number, exerciseId: number }) {
+  await db.runAsync("UPDATE routine_exercises SET exercise_id = ? WHERE id = ?", options.exerciseId, options.id);
+}
+
+export async function deleteRoutineExercise(db: SQLite.SQLiteDatabase, id: number) {
+  await db.runAsync("DELETE FROM routine_exercises WHERE id = ?", id);
 }
