@@ -30,7 +30,7 @@ export default function CreateRoutine() {
         <Text style={styles.text}>Add Exercises</Text>
       </Pressable>
 
-      <Pressable style={styles.button} onPress={() => {
+      <Pressable style={styles.button} onPress={async () => {
         async function saveRoutine() {
           const routineName = name.trim();
 
@@ -38,7 +38,7 @@ export default function CreateRoutine() {
 
           await createRoutine(db, routineName);
         }
-        saveRoutine();
+        await saveRoutine();
         router.back();
       }}>
         <Text style={styles.text}>Save</Text>

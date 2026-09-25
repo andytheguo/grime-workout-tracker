@@ -16,6 +16,7 @@ export default function Workouts() {
     useCallback(() => {
       async function setup() {
         const result = await getRoutines(db);
+
         setRoutines(result);
       }
       setup();
