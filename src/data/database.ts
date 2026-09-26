@@ -1,5 +1,28 @@
 import * as SQLite from "expo-sqlite";
 
+export type Routine = {
+  id: number,
+  name: string,
+}
+
+export type Exercise = {
+  id: number,
+  name: string,
+};
+
+export type RoutineExercise = {
+  id: number,
+  routineId: number,
+  exerciseId: number,
+};
+
+export type Set = {
+  id: number,
+  weight: number,
+  reps: number,
+  routineExercise: number
+};
+
 export async function initDatabase(db: SQLite.SQLiteDatabase) {
   await db.execAsync(`
   PRAGMA foreign_keys = ON;
@@ -42,7 +65,7 @@ export async function createExercise(db: SQLite.SQLiteDatabase, name: string) {
 }
 
 export async function getExercises(db: SQLite.SQLiteDatabase) {
-  const result = await db.getAllAsync <{ id: number, name: string }>("SELECT id, name FROM exercises ORDER BY name");
+  const result = await db.getAllAsync<Exercise>("SELECT id, name FROM exercises ORDER BY name");
 
   return result;
 }
@@ -59,7 +82,7 @@ export async function deleteExercise(db: SQLite.SQLiteDatabase, id: number) {
 }
 
 export async function getExercise(db: SQLite.SQLiteDatabase, id: number) {
-  return await db.getFirstAsync<{ id: number, name: string }>("SELECT id, name FROM exercises WHERE id = ?", id);
+  return await db.getFirstAsync<Exercise>("SELECT id, name FROM exercises WHERE id = ?", id);
 }
 
 export async function createRoutine(db: SQLite.SQLiteDatabase, name: string) {
@@ -72,7 +95,7 @@ export async function createRoutine(db: SQLite.SQLiteDatabase, name: string) {
 }
 
 export async function getRoutines(db: SQLite.SQLiteDatabase) {
-  const result = await db.getAllAsync<{ id: number, name: string }>("SELECT id, name FROM routines ORDER BY name");
+  const result = await db.getAllAsync<Routine>("SELECT id, name FROM routines ORDER BY name");
 
   return result;
 }
@@ -89,7 +112,7 @@ export async function deleteRoutine(db: SQLite.SQLiteDatabase, id: number) {
 }
 
 export async function getRoutine(db: SQLite.SQLiteDatabase, id: number) {
-  return await db.getFirstAsync<{ id: number, name: string }>("SELECT id, name FROM routines WHERE id = ?", id);
+  return await db.getFirstAsync<Routine>("SELECT id, name FROM routines WHERE id = ?", id);
 }
 
 export async function createRoutineExercise(db: SQLite.SQLiteDatabase, routineId: number, exerciseId: number) {
@@ -97,8 +120,8 @@ export async function createRoutineExercise(db: SQLite.SQLiteDatabase, routineId
 }
 
 export async function getRoutineExercises(db: SQLite.SQLiteDatabase, routineId: number) {
-  const result = await db.getAllAsync<{ id: number, exerciseName: string }>(`
-    SELECT routine_exercises.id, exercises.name
+  const result = await db.getAllAsync<RoutineExercise>(`
+    SELECT routine_exercises.id, routine_exercises.exercise_id, routine_exercises.routine_id
     FROM routine_exercises
     JOIN exercises ON routine_exercises.exercises_id = exercises.id
     WHERE routine_exercises.routine_id = ?

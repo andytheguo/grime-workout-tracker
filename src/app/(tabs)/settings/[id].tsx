@@ -1,5 +1,5 @@
 import { styles } from "@/constants/styles";
-import { getExercise, updateExercse } from "@/data/database";
+import { Exercise, getExercise, updateExercse } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 export default function EditExercise() {
   const { id } = useLocalSearchParams();
 
-  const [exercise, setExercise] = useState<{ id: number, name: string } | null>(null);
+  const [exercise, setExercise] = useState<Exercise | null>(null);
 
   const db = useSQLiteContext();
 

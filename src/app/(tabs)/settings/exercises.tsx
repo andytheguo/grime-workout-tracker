@@ -1,5 +1,5 @@
 import { styles } from "@/constants/styles";
-import { createExercise, deleteExercise, getExercises } from "@/data/database";
+import { createExercise, deleteExercise, Exercise, getExercises } from "@/data/database";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
@@ -9,7 +9,7 @@ export default function Exercises() {
   const router = useRouter();
 
   const [exerciseName, setExerciseName] = useState("");
-  const [exercises, setExercises] = useState<{ id: number, name: string }[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
   const db = useSQLiteContext();
 

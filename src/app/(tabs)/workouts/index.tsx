@@ -1,5 +1,5 @@
 import { styles } from "@/constants/styles";
-import { deleteRoutine, getRoutines } from "@/data/database";
+import { deleteRoutine, getRoutines, Routine } from "@/data/database";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
@@ -8,7 +8,7 @@ import { Pressable, Text, View } from "react-native";
 export default function Workouts() {
   const router = useRouter();
 
-  const [routines, setRoutines] = useState<{ id: number, name: string }[]>([]);
+  const [routines, setRoutines] = useState<Routine[]>([]);
 
   const db = useSQLiteContext();
 

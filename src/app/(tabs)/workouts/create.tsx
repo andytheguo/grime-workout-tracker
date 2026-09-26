@@ -1,3 +1,4 @@
+import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
 import { createRoutine } from "@/data/database";
 import { useRouter } from "expo-router";
@@ -9,6 +10,8 @@ export default function CreateRoutine() {
   const router = useRouter();
 
   const [name, setName] = useState("");
+
+  const { selectedExercises } = useRoutineDraftContext();
 
   const db = useSQLiteContext();
 
@@ -29,6 +32,12 @@ export default function CreateRoutine() {
       <Pressable style={styles.button} onPress={() => router.navigate("/workouts/add")}>
         <Text style={styles.text}>Add Exercises</Text>
       </Pressable>
+
+      <Text style={{ fontSize: 25 }}>Your Exercises</Text>
+
+      {Array.from(selectedExercises.values()).map((exercise) => (
+        <Text key={exercise.id}>{exercise.name}</Text>
+      ))}
 
       <Pressable style={styles.button} onPress={async () => {
         async function saveRoutine() {

@@ -1,9 +1,10 @@
+import { Exercise } from "@/data/database";
 import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
 
 type RoutineDraft = {
-  selectedExercises: number[],
-  setSelectedExercises: Dispatch<SetStateAction<number[]>>
-}
+  selectedExercises: Map<number, Exercise>,
+  setSelectedExercises: Dispatch<SetStateAction<Map<number, Exercise>>>
+};
 
 export const RoutineDraftContext = createContext<RoutineDraft | undefined>(undefined);
 
@@ -18,7 +19,7 @@ export function useRoutineDraftContext() {
 }
 
 export function RoutineDraftProvider({ children } : { children: ReactNode }) {
-  const [selectedExercises, setSelectedExercises] = useState<number[]>([]);
+  const [selectedExercises, setSelectedExercises] = useState<Map<number, Exercise>>(new Map<number, Exercise>());
 
   return (
     <RoutineDraftContext.Provider value={{ selectedExercises, setSelectedExercises }}>

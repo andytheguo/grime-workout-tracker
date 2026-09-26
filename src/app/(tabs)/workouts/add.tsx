@@ -1,14 +1,27 @@
-import { useRoutineDraftContext } from "@/app/contexts/RoutineDraftContext";
+import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
-import { getExercises } from "@/data/database";
+import { Exercise, getExercises } from "@/data/database";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+
+import { Checkbox } from "expo-checkbox";
+import { useRouter } from "expo-router";
 
 export default function AddExercises() {
+  const router = useRouter();
+
   const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
 
-  const [exercises, setExercises] = useState<{ id: number, name: string }[]>([]);
+  function toggleExercise(exercise: Exercise) {
+    setSelectedExercises((current) => {
+      const set = new Map(current);
+      current.has(exercise.id) ? set.delete(exercise.id) : set.set(exercise.id, exercise);
+      return set;
+    });
+  }
+
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
   const db = useSQLiteContext();
 
@@ -18,11 +31,25 @@ export default function AddExercises() {
       setExercises(result);
     }
     setup();
-  }, []);
+  }, [db]);
 
   return (
     <View style={styles.container}>
-      <Text>Exercises</Text>
+      {exercises.map((exercise) => {
+        return (
+          <View key={exercise.id}>
+            <Checkbox
+              value={selectedExercises.has(exercise.id)}
+              onValueChange={() => toggleExercise(exercise)}
+            />
+            <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
+          </View>
+        );
+      })}
+
+      <Pressable style={styles.button} onPress={() => router.back()}>
+        <Text style={styles.text}>Done</Text>
+      </Pressable>
     </View>
   );
 }
