@@ -14,6 +14,7 @@ export type RoutineExercise = {
   id: number,
   routineId: number,
   exerciseId: number,
+  name: string
 };
 
 export type Set = {
@@ -116,14 +117,16 @@ export async function getRoutine(db: SQLite.SQLiteDatabase, id: number) {
 }
 
 export async function createRoutineExercise(db: SQLite.SQLiteDatabase, routineId: number, exerciseId: number) {
-  await db.runAsync("INSERT INTO routine_exercises (routine_id, exercise_id) VALUES (?, ?)", routineId, exerciseId);
+  const result = await db.runAsync("INSERT INTO routine_exercises (routine_id, exercise_id) VALUES (?, ?)", routineId, exerciseId);
+
+  return result.lastInsertRowId;
 }
 
 export async function getRoutineExercises(db: SQLite.SQLiteDatabase, routineId: number) {
   const result = await db.getAllAsync<RoutineExercise>(`
-    SELECT routine_exercises.id, routine_exercises.exercise_id, routine_exercises.routine_id
+    SELECT routine_exercises.id, routine_exercises.exercise_id, routine_exercises.routine_id, exercises.name
     FROM routine_exercises
-    JOIN exercises ON routine_exercises.exercises_id = exercises.id
+    JOIN exercises ON routine_exercises.exercise_id = exercises.id
     WHERE routine_exercises.routine_id = ?
     ORDER BY exercises.name
     `,

@@ -1,4 +1,4 @@
-import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
+import { toggleExercise, useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
 import { Exercise, getExercises } from "@/data/database";
 import { useSQLiteContext } from "expo-sqlite";
@@ -12,14 +12,6 @@ export default function AddExercises() {
   const router = useRouter();
 
   const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
-
-  function toggleExercise(exercise: Exercise) {
-    setSelectedExercises((current) => {
-      const set = new Map(current);
-      current.has(exercise.id) ? set.delete(exercise.id) : set.set(exercise.id, exercise);
-      return set;
-    });
-  }
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
 
@@ -40,7 +32,7 @@ export default function AddExercises() {
           <View key={exercise.id}>
             <Checkbox
               value={selectedExercises.has(exercise.id)}
-              onValueChange={() => toggleExercise(exercise)}
+              onValueChange={() => setSelectedExercises((selected) => toggleExercise(selected, exercise))}
             />
             <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
           </View>

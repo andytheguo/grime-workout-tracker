@@ -27,3 +27,9 @@ export function RoutineDraftProvider({ children } : { children: ReactNode }) {
     </RoutineDraftContext.Provider>
   )
 }
+
+export function toggleExercise(selected: Map<number, Exercise>, exercise: Exercise) {
+  const map = new Map(selected);
+  selected.has(exercise.id) ? map.delete(exercise.id) : map.set(exercise.id, exercise);
+  return map;
+}

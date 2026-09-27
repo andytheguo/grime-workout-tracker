@@ -34,7 +34,9 @@ export default function Workouts() {
         <Text style={{ fontSize: 25 }}>Your Routines</Text>
         {routines.map((routine) => (
           <View key={routine.id}>
-            <Text style={{ fontSize: 25 }}>{routine.name}</Text>
+            <Pressable onPress={() => router.navigate(`/workouts/${routine.id}`)}>
+              <Text style={{ fontSize: 25 }}>{routine.name}</Text>
+            </Pressable>
 
             <Pressable style={styles.button} onPress={async () => {
               await deleteRoutine(db, routine.id);

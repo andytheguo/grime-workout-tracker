@@ -1,6 +1,6 @@
-import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
+import { toggleExercise, useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
-import { createRoutine } from "@/data/database";
+import { createRoutine, createRoutineExercise } from "@/data/database";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
@@ -11,7 +11,7 @@ export default function CreateRoutine() {
 
   const [name, setName] = useState("");
 
-  const { selectedExercises } = useRoutineDraftContext();
+  const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
 
   const db = useSQLiteContext();
 
@@ -36,7 +36,15 @@ export default function CreateRoutine() {
       <Text style={{ fontSize: 25 }}>Your Exercises</Text>
 
       {Array.from(selectedExercises.values()).map((exercise) => (
-        <Text key={exercise.id}>{exercise.name}</Text>
+        <View key={exercise.id}>
+          <Text>{exercise.name}</Text>
+          <Pressable
+            style={styles.button}
+            onPress={() => setSelectedExercises((selected) => toggleExercise(selected, exercise))}
+          >
+            <Text style={{ color: "white" }}>Delete</Text>
+          </Pressable>
+        </View>
       ))}
 
       <Pressable style={styles.button} onPress={async () => {
@@ -45,7 +53,11 @@ export default function CreateRoutine() {
 
           if (routineName.trim() === "") return;
 
-          await createRoutine(db, routineName);
+          const routineId = await createRoutine(db, routineName);
+
+          for (const selected of selectedExercises.values()) {
+            await createRoutineExercise(db, routineId, selected.id);
+          }
         }
         await saveRoutine();
         router.back();
