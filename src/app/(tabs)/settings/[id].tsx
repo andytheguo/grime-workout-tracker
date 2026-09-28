@@ -19,7 +19,7 @@ export default function EditExercise() {
     }
 
     loadExercise();
-  }, [db]);
+  }, [db, id]);
 
   return (
     <>

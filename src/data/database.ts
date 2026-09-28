@@ -17,11 +17,11 @@ export type RoutineExercise = {
   name: string
 };
 
-export type Set = {
+export type ExerciseSet = {
   id: number,
   weight: number,
   reps: number,
-  routineExercise: number
+  routineExerciseId: number
 };
 
 export async function initDatabase(db: SQLite.SQLiteDatabase) {
@@ -48,10 +48,10 @@ export async function initDatabase(db: SQLite.SQLiteDatabase) {
 
   CREATE TABLE IF NOT EXISTS sets (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    weight INTEGER,
-    reps INTEGER,
-    routine_exercises_id INTEGER NOT NULL,
-    FOREIGN KEY (routine_exercises_id) REFERENCES routine_exercises(id) ON DELETE CASCADE
+    weight INTEGER NOT NULL DEFAULT 0,
+    reps INTEGER NOT NULL DEFAULT 0,
+    routine_exercise_id INTEGER NOT NULL,
+    FOREIGN KEY (routine_exercise_id) REFERENCES routine_exercises(id) ON DELETE CASCADE
   );
 `);
 }
@@ -142,4 +142,28 @@ export async function updateRoutineExercise(db: SQLite.SQLiteDatabase, options: 
 
 export async function deleteRoutineExercise(db: SQLite.SQLiteDatabase, id: number) {
   await db.runAsync("DELETE FROM routine_exercises WHERE id = ?", id);
+}
+
+export async function createSet(db: SQLite.SQLiteDatabase, routineExerciseId: number) {
+  const result = await db.runAsync("INSERT INTO sets (routine_exercise_id) VALUES (?)", routineExerciseId);
+
+  return result.lastInsertRowId;
+}
+
+export async function getSets(db: SQLite.SQLiteDatabase, routineExerciseId: number) {
+  const result = await db.getAllAsync<ExerciseSet>("SELECT id, weight, reps FROM sets WHERE routine_exercise_id = ? ORDER BY id", routineExerciseId);
+
+  return result;
+}
+
+export async function updateSet(db: SQLite.SQLiteDatabase, options: { id: number, weight: number, reps: number }) {
+  await db.runAsync("UPDATE sets SET weight = ?, reps = ? WHERE id = ?", options.weight, options.reps, options.id);
+}
+
+export async function deleteSet(db: SQLite.SQLiteDatabase, id: number) {
+  await db.runAsync("DELETE FROM sets WHERE id = ?", id);
+}
+
+export async function getSet(db: SQLite.SQLiteDatabase, id: number) {
+  return await db.getFirstAsync<ExerciseSet>("SELECT id, weight, reps, routineExerciseId FROM sets WHERE id = ?", id);
 }
