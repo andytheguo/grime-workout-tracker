@@ -74,6 +74,9 @@ export default function EditRoutine() {
       <EditorModal
         routineExercises={routineExercises}
         visible={edit}
+        sets={sets}
+        setSets={setSets}
+        onClose={() => setEdit(false)}
       />
     </>
   );

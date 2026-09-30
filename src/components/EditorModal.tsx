@@ -3,49 +3,68 @@ import { createSet, ExerciseSet, getSets, RoutineExercise } from "@/data/databas
 import { Modal, Pressable, Text, View } from "react-native";
 import { SetEditor } from "./SetEditor";
 import { useSQLiteContext } from "expo-sqlite";
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
-export function EditorModal({ routineExercises, visible }: { routineExercises: RoutineExercise[], visible: boolean}) {
-  const [sets, setSets] = useState<Map<number, ExerciseSet[]>>(new Map<number, ExerciseSet[]>());
+interface EditorModalProps {
+  routineExercises: RoutineExercise[],
+  visible: boolean,
+  sets: Map<number, ExerciseSet[]>,
+  setSets: Dispatch<SetStateAction<Map<number, ExerciseSet[]>>>,
+  onClose: () => void
+};
 
+export function EditorModal({
+  routineExercises,
+  visible,
+  sets,
+  setSets,
+  onClose
+}: EditorModalProps) {
   const db = useSQLiteContext();
 
   return (
     <Modal
       visible={visible}
+      onDismiss={onClose}
       animationType="slide"
     >
-      {routineExercises.map((routineExercise) => {
-        const exerciseSets = sets.get(routineExercise.id) ?? [];
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Pressable style={styles.button} onPress={onClose}>
+          <Text style={styles.text}>Close</Text>
+        </Pressable>
 
-        return (
-          <View style={{ alignItems: "center" }} key={routineExercise.id}>
-            <Pressable>
-              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
-            </Pressable>
+        {routineExercises.map((routineExercise) => {
+          const exerciseSets = sets.get(routineExercise.id) ?? [];
 
-            {exerciseSets.map((exerciseSet, index) => (
-              <SetEditor set={exerciseSet} index={index} key={exerciseSet.id}/>
-            ))}
+          return (
+            <View key={routineExercise.id}>
+              <Pressable>
+                <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+              </Pressable>
 
-            <Pressable
-              style={styles.button}
-              onPress={async () => {
-                await createSet(db, routineExercise.id)
-                const result = await getSets(db, routineExercise.id);
+              {exerciseSets.map((exerciseSet, index) => (
+                <SetEditor set={exerciseSet} index={index} key={exerciseSet.id}/>
+              ))}
 
-                setSets((oldSets) => {
-                  const map = new Map<number, ExerciseSet[]>(oldSets);
-                  map.set(routineExercise.id, result);
-                  return map;
-                });
-              }}
-            >
-              <Text style={styles.text}>Add Set</Text>
-            </Pressable>
-          </View>
-        );
-      })}
+              <Pressable
+                style={styles.button}
+                onPress={async () => {
+                  await createSet(db, routineExercise.id)
+                  const result = await getSets(db, routineExercise.id);
+
+                  setSets((oldSets) => {
+                    const map = new Map<number, ExerciseSet[]>(oldSets);
+                    map.set(routineExercise.id, result);
+                    return map;
+                  });
+                }}
+              >
+                <Text style={styles.text}>Add Set</Text>
+              </Pressable>
+            </View>
+          );
+        })}
+      </View>
     </Modal>
   );
 }

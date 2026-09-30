@@ -1,7 +1,8 @@
-import { ExerciseSet, updateSet } from "@/data/database";
+import { styles } from "@/constants/styles";
+import { deleteSet, ExerciseSet, updateSet } from "@/data/database";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 
 export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
   const [weight, setWeight] = useState<string>(String(set.weight));
@@ -39,6 +40,9 @@ export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
         }}
       />
 
+      <Pressable style={styles.button} onPress={async () => await deleteSet(db, set.id)}>
+        <Text style={styles.text}>Delete</Text>
+      </Pressable>
     </View>
   );
 }
