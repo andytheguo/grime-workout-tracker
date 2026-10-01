@@ -1,14 +1,18 @@
 import { styles } from "@/constants/styles";
-import { deleteSet, ExerciseSet, updateSet } from "@/data/database";
-import { useSQLiteContext } from "expo-sqlite";
+import { ExerciseSet } from "@/data/database";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
-export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
+interface SetEditorProps {
+  set: ExerciseSet,
+  index: number,
+  onSave: (weight: number, reps: number) => void,
+  onDelete: () => void
+};
+
+export function SetEditor({ set, index, onSave, onDelete }: SetEditorProps) {
   const [weight, setWeight] = useState<string>(String(set.weight));
   const [reps, setReps] = useState<string>(String(set.reps));
-
-  const db = useSQLiteContext();
 
   return (
     <View>
@@ -18,7 +22,7 @@ export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
         placeholderTextColor="white"
         onChangeText={setWeight}
         value={weight}
-        onEndEditing={async () => await updateSet(db, { id: set.id, weight: Number(weight), reps: Number(reps) })}
+        onEndEditing={() => onSave(Number(weight), Number(reps))}
         style={{
           width: 300,
           height: 50,
@@ -31,7 +35,7 @@ export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
         placeholderTextColor="white"
         onChangeText={setReps}
         value={String(reps)}
-        onEndEditing={async () => await updateSet(db, { id: set.id, weight: Number(weight), reps: Number(reps) })}
+        onEndEditing={() => onSave(Number(weight), Number(reps))}
         style={{
           width: 300,
           height: 50,
@@ -40,7 +44,7 @@ export function SetEditor({ set, index } : { set: ExerciseSet, index: number}) {
         }}
       />
 
-      <Pressable style={styles.button} onPress={async () => await deleteSet(db, set.id)}>
+      <Pressable style={styles.button} onPress={onDelete}>
         <Text style={styles.text}>Delete</Text>
       </Pressable>
     </View>

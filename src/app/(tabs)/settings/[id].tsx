@@ -1,5 +1,5 @@
 import { styles } from "@/constants/styles";
-import { Exercise, getExercise, updateExercse } from "@/data/database";
+import { Exercise, getExercise, updateExercise } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -47,7 +47,7 @@ export default function EditExercise() {
 
         <Pressable style={styles.button} onPress={async () => {
           if (exercise) {
-            await updateExercse(db, { id: exercise.id, name: exercise.name });
+            await updateExercise(db, { id: exercise.id, name: exercise.name });
           }
         }}>
           <Text style={styles.text}>Save</Text>

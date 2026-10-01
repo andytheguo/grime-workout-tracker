@@ -12,6 +12,7 @@ export default function EditRoutine() {
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [routineExercises, setRoutineExercises] = useState<RoutineExercise[]>([]);
+  // Maps routineExercise ID to its sets
   const [sets, setSets] = useState<Map<number, ExerciseSet[]>>(new Map<number, ExerciseSet[]>());
   const [edit, setEdit] = useState(false);
 

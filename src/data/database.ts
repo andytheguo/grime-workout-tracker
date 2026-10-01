@@ -71,7 +71,7 @@ export async function getExercises(db: SQLite.SQLiteDatabase) {
   return result;
 }
 
-export async function updateExercse(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
+export async function updateExercise(db: SQLite.SQLiteDatabase, options: { id: number, name: string }) {
   const result = await db.runAsync("UPDATE exercises SET name = ? WHERE id = ?", options.name, options.id);
 
   // TEST
@@ -124,7 +124,7 @@ export async function createRoutineExercise(db: SQLite.SQLiteDatabase, routineId
 
 export async function getRoutineExercises(db: SQLite.SQLiteDatabase, routineId: number) {
   const result = await db.getAllAsync<RoutineExercise>(`
-    SELECT routine_exercises.id, routine_exercises.exercise_id, routine_exercises.routine_id, exercises.name
+    SELECT routine_exercises.id AS id, routine_exercises.routine_id AS routineId, routine_exercises.exercise_id AS routineId, exercises.name AS name
     FROM routine_exercises
     JOIN exercises ON routine_exercises.exercise_id = exercises.id
     WHERE routine_exercises.routine_id = ?
@@ -151,7 +151,7 @@ export async function createSet(db: SQLite.SQLiteDatabase, routineExerciseId: nu
 }
 
 export async function getSets(db: SQLite.SQLiteDatabase, routineExerciseId: number) {
-  const result = await db.getAllAsync<ExerciseSet>("SELECT id, weight, reps FROM sets WHERE routine_exercise_id = ? ORDER BY id", routineExerciseId);
+  const result = await db.getAllAsync<ExerciseSet>("SELECT id, weight, reps, routine_exercise_id AS routineExerciseId FROM sets WHERE routine_exercise_id = ? ORDER BY id", routineExerciseId);
 
   return result;
 }
@@ -165,5 +165,5 @@ export async function deleteSet(db: SQLite.SQLiteDatabase, id: number) {
 }
 
 export async function getSet(db: SQLite.SQLiteDatabase, id: number) {
-  return await db.getFirstAsync<ExerciseSet>("SELECT id, weight, reps, routineExerciseId FROM sets WHERE id = ?", id);
+  return await db.getFirstAsync<ExerciseSet>("SELECT id, weight, reps, routine_exercise_id AS routineExerciseId FROM sets WHERE id = ?", id);
 }
