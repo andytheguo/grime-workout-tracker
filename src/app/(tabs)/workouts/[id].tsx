@@ -2,7 +2,7 @@ import { EditorModal } from "@/components/EditorModal";
 import { SetRow } from "@/components/SetRow";
 import { styles } from "@/constants/styles";
 import { ExerciseSet, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -68,7 +68,7 @@ export default function EditRoutine() {
         })}
 
         <Pressable style={styles.button}>
-          <Text style={styles.text}>Start</Text>
+          <Text style={styles.text} onPress={() => router.navigate(`/workouts/${id}/start`)}>Start</Text>
         </Pressable>
       </View>
 
