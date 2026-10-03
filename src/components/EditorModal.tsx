@@ -35,7 +35,7 @@ export function EditorModal({
       const exerciseSets = map.get(set.routineExerciseId);
 
       if (!exerciseSets) {
-        throw new Error("Could not find exercises associated with this routine");
+        throw new Error("Could not find sets associated with this routine");
       }
 
       const updatedSets = exerciseSets.map((setData) => setData.id === set.id ? { ...setData, weight: set.weight, reps: set.reps} : setData);
@@ -55,7 +55,7 @@ export function EditorModal({
       const exerciseSets = map.get(routineExerciseId);
 
       if (!exerciseSets) {
-        throw new Error("Could not find exercises associated with this routine");
+        throw new Error("Could not find sets associated with this routine");
       }
 
       const updatedSets = exerciseSets.filter((setData) => setData.id !== setId);
@@ -118,6 +118,10 @@ export function EditorModal({
             </View>
           );
         })}
+
+        <Pressable style={styles.button}>
+          <Text style={styles.text}>Add Exercise</Text>
+        </Pressable>
       </View>
     </Modal>
   );

@@ -1,5 +1,4 @@
 import { SetLogger } from "@/components/SetLogger";
-import { SetRow } from "@/components/SetRow";
 import { styles } from "@/constants/styles";
 import { ExerciseSet, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -50,7 +49,7 @@ export default function StartRoutine() {
       const exerciseSets = map.get(set.routineExerciseId);
 
       if (!exerciseSets) {
-        throw new Error("Could not find exercises associated with this routine");
+        throw new Error("Could not find sets associated with this routine");
       }
 
       const updatedSets = exerciseSets.map((setData) => setData.id === set.id ? { ...setData, weight: set.weight, reps: set.reps} : setData);
@@ -61,14 +60,47 @@ export default function StartRoutine() {
     });
   }
 
-  async function removeActiveSet(routineExerciseId: number, setId: number) {
+  function addActiveSet(routineExerciseId: number) {
     setActiveSets((oldSets) => {
       const map = new Map(oldSets);
 
       const exerciseSets = map.get(routineExerciseId);
 
       if (!exerciseSets) {
-        throw new Error("Could not find exercises associated with this routine");
+        throw new Error("Could not find sets associated with this routine");
+      }
+
+      const lastIndex = exerciseSets.length - 1;
+      let weight = 0;
+      let reps = 0;
+
+      if (lastIndex >= 0) {
+        const lastSet = exerciseSets[lastIndex];
+        weight = lastSet.weight;
+        reps = lastSet.reps;
+      }
+
+      const newSet: ExerciseSet = {
+        id: -Date.now(), // Negative temp ID so no clashes
+        weight: weight,
+        reps: reps,
+        routineExerciseId: routineExerciseId
+      }
+
+      map.set(routineExerciseId, [...exerciseSets, newSet]);
+
+      return map;
+    });
+  }
+
+  function removeActiveSet(routineExerciseId: number, setId: number) {
+    setActiveSets((oldSets) => {
+      const map = new Map(oldSets);
+
+      const exerciseSets = map.get(routineExerciseId);
+
+      if (!exerciseSets) {
+        throw new Error("Could not find sets associated with this routine");
       }
 
       const updatedSets = exerciseSets.filter((setData) => setData.id !== setId);
@@ -106,9 +138,17 @@ export default function StartRoutine() {
                   onDelete={() => removeActiveSet(routineExercise.id, exerciseSet.id)}
                 />
               ))}
+
+              <Pressable style={styles.button} onPress={() => addActiveSet(routineExercise.id)}>
+                <Text style={styles.text}>Add Set</Text>
+              </Pressable>
             </View>
           );
         })}
+
+        <Pressable style={styles.button}>
+          <Text style={styles.text}>Add Exercise</Text>
+        </Pressable>
 
         <Pressable style={styles.button} onPress={() => router.back()}>
           <Text style={styles.text}>Finish</Text>

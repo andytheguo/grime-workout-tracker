@@ -54,7 +54,7 @@ export async function initDatabase(db: SQLite.SQLiteDatabase) {
     FOREIGN KEY (routine_exercise_id) REFERENCES routine_exercises(id) ON DELETE CASCADE
   );
 
-  CREATE TABLE IF NOT EXISTS routine_exercise_histories (
+  CREATE TABLE IF NOT EXISTS exercise_histories (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     exercise_id INTEGER NOT NULL,
     routine_exercise_id INTEGER NOT NULL,
