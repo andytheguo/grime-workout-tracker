@@ -1,10 +1,11 @@
-import { toggleExercise, useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
+import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
-import { createRoutine, createRoutineExercise } from "@/data/database";
+import { createRoutine, createRoutineExercise, Exercise, getExercises } from "@/data/database";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { SelectorModal } from "@/components/SelectorModal";
 
 export default function CreateRoutine() {
   const router = useRouter();
@@ -12,8 +13,26 @@ export default function CreateRoutine() {
   const [name, setName] = useState("");
 
   const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [selecting, setSelecting] = useState(false);
 
   const db = useSQLiteContext();
+
+  useEffect(() => {
+    async function setup() {
+      const result = await getExercises(db);
+      setExercises(result);
+    }
+    setup();
+  }, [db]);
+
+  function removeExercise(exerciseId: number) {
+    setSelectedExercises((oldExercises) => {
+      const map = new Map(oldExercises);
+      map.delete(exerciseId);
+      return map;
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -29,7 +48,7 @@ export default function CreateRoutine() {
         }}
       />
 
-      <Pressable style={styles.button} onPress={() => router.navigate("/workouts/add")}>
+      <Pressable style={styles.button} onPress={() => setSelecting(true)}>
         <Text style={styles.text}>Add Exercises</Text>
       </Pressable>
 
@@ -37,12 +56,12 @@ export default function CreateRoutine() {
 
       {Array.from(selectedExercises.values()).map((exercise) => (
         <View key={exercise.id}>
-          <Text>{exercise.name}</Text>
+          <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
           <Pressable
             style={styles.button}
-            onPress={() => setSelectedExercises((selected) => toggleExercise(selected, exercise))}
+            onPress={() => removeExercise(exercise.id)}
           >
-            <Text style={{ color: "white" }}>Delete</Text>
+            <Text style={styles.text}>Delete</Text>
           </Pressable>
         </View>
       ))}
@@ -64,6 +83,12 @@ export default function CreateRoutine() {
       }}>
         <Text style={styles.text}>Save</Text>
       </Pressable>
+
+      <SelectorModal
+        visible={selecting}
+        exercises={exercises}
+        onClose={() => setSelecting(false)}
+      />
     </View>
   );
 }
