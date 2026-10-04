@@ -15,20 +15,38 @@ export function SelectorModal({
   exercises,
   onClose
 }: SelectorModalProps) {
-  const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
+  const { selectedExercises, setSelectedExercises, setExerciseSets } = useRoutineDraftContext();
 
   function toggleExercise(exercise: Exercise) {
     setSelectedExercises((oldExercises) => {
-      const map = new Map(oldExercises);
+      const exerciseMap = new Map(oldExercises);
 
-      if (map.has(exercise.id)) {
-        map.delete(exercise.id);
+      if (exerciseMap.has(exercise.id)) {
+        exerciseMap.delete(exercise.id);
+
+        setExerciseSets((oldSets) => {
+          const setMap = new Map(oldSets);
+          setMap.delete(exercise.id);
+          return setMap;
+        });
       }
       else {
-        map.set(exercise.id, exercise);
+        exerciseMap.set(exercise.id, exercise);
+
+        setExerciseSets((oldSets) => {
+          const setMap = new Map(oldSets);
+
+          // Default sets
+          setMap.set(exercise.id, [{
+            weight: 0,
+            reps: 0
+          }]);
+
+          return setMap
+        });
       }
 
-      return map;
+      return exerciseMap;
     });
   }
 

@@ -1,4 +1,4 @@
-import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
+import { SetDraft, useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
 import { createRoutine, createRoutineExercise, Exercise, getExercises } from "@/data/database";
 import { useRouter } from "expo-router";
@@ -6,13 +6,14 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { SelectorModal } from "@/components/SelectorModal";
+import { DraftSetEditor } from "@/components/DraftSetEditor";
 
 export default function CreateRoutine() {
   const router = useRouter();
 
   const [name, setName] = useState("");
 
-  const { selectedExercises, setSelectedExercises } = useRoutineDraftContext();
+  const { selectedExercises, setSelectedExercises, exerciseSets, setExerciseSets } = useRoutineDraftContext();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selecting, setSelecting] = useState(false);
 
@@ -30,6 +31,73 @@ export default function CreateRoutine() {
     setSelectedExercises((oldExercises) => {
       const map = new Map(oldExercises);
       map.delete(exerciseId);
+      return map;
+    });
+  }
+
+  function addDraftSet(exerciseId: number) {
+    setExerciseSets((oldSets) => {
+      const map = new Map(oldSets);
+
+      const sets = map.get(exerciseId);
+
+      if (!sets) {
+        throw new Error("Could not find sets associated with this exercise");
+      }
+
+      const lastIndex = sets.length - 1;
+      let weight = 0;
+      let reps = 0;
+
+      if (lastIndex >= 0) {
+        const lastSet = sets[lastIndex];
+        weight = lastSet.weight;
+        reps = lastSet.reps;
+      }
+
+      const newSet: SetDraft = {
+        weight: weight,
+        reps: reps,
+      }
+
+      map.set(exerciseId, [...sets, newSet]);
+
+      return map;
+    });
+  }
+
+  function saveDraftSet(exerciseId: number, index: number, weight: number, reps: number) {
+    setExerciseSets((oldSets) => {
+      const map = new Map(oldSets);
+
+      const sets = map.get(exerciseId);
+
+      if (!sets) {
+        throw new Error("Could not find sets associated with this exercise");
+      }
+
+      const updatedSets = sets.map((setData, i) => i === index ? { weight: weight, reps: reps} : setData);
+
+      map.set(exerciseId, updatedSets);
+
+      return map;
+    });
+  }
+
+  function removeDraftSet(exerciseId: number, index: number) {
+    setExerciseSets((oldSets) => {
+      const map = new Map(oldSets);
+
+      const sets = map.get(exerciseId);
+
+      if (!sets) {
+        throw new Error("Could not find sets associated with this exercise");
+      }
+
+      const updatedSets = sets.filter((setData, i) => i !== index);
+
+      map.set(exerciseId, updatedSets);
+
       return map;
     });
   }
@@ -54,17 +122,34 @@ export default function CreateRoutine() {
 
       <Text style={{ fontSize: 25 }}>Your Exercises</Text>
 
-      {Array.from(selectedExercises.values()).map((exercise) => (
-        <View key={exercise.id}>
-          <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
-          <Pressable
-            style={styles.button}
-            onPress={() => removeExercise(exercise.id)}
-          >
-            <Text style={styles.text}>Delete</Text>
-          </Pressable>
-        </View>
-      ))}
+      {Array.from(selectedExercises.values()).map((exercise, index) => {
+        const sets = exerciseSets.get(exercise.id) ?? [];
+
+        return (
+          <View key={exercise.id}>
+            <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
+            <Pressable
+              style={styles.button}
+              onPress={() => removeExercise(exercise.id)}
+            >
+              <Text style={styles.text}>Delete</Text>
+            </Pressable>
+
+            {sets.map((set, index) => (
+              <DraftSetEditor
+                key={index}
+                set={set}
+                index={index}
+                onSave={(weight, reps) => saveDraftSet(exercise.id, index, weight, reps)}
+                onDelete={() => removeDraftSet(exercise.id, index)}
+              />
+            ))}
+
+            <Pressable style={styles.button} onPress={() => addDraftSet(exercise.id)}>
+              <Text style={styles.text}>Add Set</Text>
+            </Pressable>
+          </View>);
+        })}
 
       <Pressable style={styles.button} onPress={async () => {
         async function saveRoutine() {
