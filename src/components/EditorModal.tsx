@@ -1,68 +1,56 @@
 import { styles } from "@/constants/styles";
-import { createSet, deleteSet, ExerciseSet, getSets, RoutineExercise, updateSet } from "@/data/database";
+import { Exercise, ExerciseSet, RoutineExercise } from "@/data/database";
 import { Modal, Pressable, Text, View } from "react-native";
 import { SetEditor } from "./SetEditor";
-import { useSQLiteContext } from "expo-sqlite";
-import { Dispatch, SetStateAction } from "react";
+import { SelectorModal } from "./SelectorModal";
+import { useState } from "react";
 
 interface EditorModalProps {
   routineExercises: RoutineExercise[],
   visible: boolean,
+  exercises: Exercise[]
   sets: Map<number, ExerciseSet[]>,
-  setSets: Dispatch<SetStateAction<Map<number, ExerciseSet[]>>>,
-  onClose: () => void
+  onClose: () => void,
+  onSaveSet: (set: ExerciseSet) => void,
+  onRemoveSet: (routineExerciseId: number, setId: number) => void,
+  onAddSet: (routineExerciseId: number) => void,
+  onAddExercise: (exercise: Exercise) => void
 };
 
 export function EditorModal({
   routineExercises,
   visible,
+  exercises,
   sets,
-  setSets,
-  onClose
+  onClose,
+  onSaveSet,
+  onRemoveSet,
+  onAddSet,
+  onAddExercise
 }: EditorModalProps) {
-  const db = useSQLiteContext();
+  const [selecting, setSelecting] = useState(false);
+  const [selectedExercises, setSelectedExercises] = useState<Map<number, Exercise>>(new Map());
 
-  async function saveSet(set: ExerciseSet) {
-    await updateSet(db, {
-      id: set.id,
-      weight: set.weight,
-      reps: set.reps
-    });
+  function addSelected() {
+    for (const exercise of selectedExercises.values()) {
+      onAddExercise(exercise);
+    }
 
-    setSets((oldSets) => {
-      const map = new Map(oldSets);
-
-      const exerciseSets = map.get(set.routineExerciseId);
-
-      if (!exerciseSets) {
-        throw new Error("Could not find sets associated with this routine");
-      }
-
-      const updatedSets = exerciseSets.map((setData) => setData.id === set.id ? { ...setData, weight: set.weight, reps: set.reps} : setData);
-
-      map.set(set.routineExerciseId, updatedSets);
-
-      return map;
-    });
+    setSelectedExercises(new Map());
   }
 
-  async function removeSet(routineExerciseId: number, setId: number) {
-    await deleteSet(db, setId);
+  function toggleExercise(exercise: Exercise) {
+    setSelectedExercises((oldExercises) => {
+      const exerciseMap = new Map(oldExercises);
 
-    setSets((oldSets) => {
-      const map = new Map(oldSets);
-
-      const exerciseSets = map.get(routineExerciseId);
-
-      if (!exerciseSets) {
-        throw new Error("Could not find sets associated with this routine");
+      if (exerciseMap.has(exercise.id)) {
+        exerciseMap.delete(exercise.id);
+      }
+      else {
+        exerciseMap.set(exercise.id, exercise);
       }
 
-      const updatedSets = exerciseSets.filter((setData) => setData.id !== setId);
-
-      map.set(routineExerciseId, updatedSets);
-
-      return map;
+      return exerciseMap;
     });
   }
 
@@ -91,27 +79,18 @@ export function EditorModal({
                   key={exerciseSet.id}
                   set={exerciseSet}
                   index={index}
-                  onSave={(weight, reps) => saveSet({
+                  onSave={(weight, reps) => onSaveSet({
                     ...exerciseSet,
                     weight: weight,
                     reps: reps,
                   })}
-                  onDelete={() => removeSet(routineExercise.id, exerciseSet.id)}
+                  onDelete={() => onRemoveSet(routineExercise.id, exerciseSet.id)}
                 />
               ))}
 
               <Pressable
                 style={styles.button}
-                onPress={async () => {
-                  await createSet(db, routineExercise.id)
-                  const result = await getSets(db, routineExercise.id);
-
-                  setSets((oldSets) => {
-                    const map = new Map<number, ExerciseSet[]>(oldSets);
-                    map.set(routineExercise.id, result);
-                    return map;
-                  });
-                }}
+                onPress={() => onAddSet(routineExercise.id)}
               >
                 <Text style={styles.text}>Add Set</Text>
               </Pressable>
@@ -119,10 +98,21 @@ export function EditorModal({
           );
         })}
 
-        <Pressable style={styles.button}>
+        <Pressable style={styles.button} onPress={() => setSelecting(true)}>
           <Text style={styles.text}>Add Exercise</Text>
         </Pressable>
       </View>
+
+      <SelectorModal
+        visible={selecting}
+        exercises={exercises}
+        selectedExercises={selectedExercises}
+        onToggle={(exercise) => toggleExercise(exercise)}
+        onClose={() => {
+          addSelected();
+          setSelecting(false);
+        }}
+      />
     </Modal>
   );
 }

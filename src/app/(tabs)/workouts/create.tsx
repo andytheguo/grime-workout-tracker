@@ -1,6 +1,6 @@
 import { SetDraft, useRoutineDraftContext } from "@/contexts/RoutineDraftContext";
 import { styles } from "@/constants/styles";
-import { createRoutine, createRoutineExercise, Exercise, getExercises } from "@/data/database";
+import { createRoutine, createRoutineExercise, createSet, Exercise, getExercises } from "@/data/database";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -102,6 +102,39 @@ export default function CreateRoutine() {
     });
   }
 
+  function toggleExercise(exercise: Exercise) {
+    setSelectedExercises((oldExercises) => {
+      const exerciseMap = new Map(oldExercises);
+
+      if (exerciseMap.has(exercise.id)) {
+        exerciseMap.delete(exercise.id);
+
+        setExerciseSets((oldSets) => {
+          const setMap = new Map(oldSets);
+          setMap.delete(exercise.id);
+          return setMap;
+        });
+      }
+      else {
+        exerciseMap.set(exercise.id, exercise);
+
+        setExerciseSets((oldSets) => {
+          const setMap = new Map(oldSets);
+
+          // Default sets
+          setMap.set(exercise.id, [{
+            weight: 0,
+            reps: 0
+          }]);
+
+          return setMap
+        });
+      }
+
+      return exerciseMap;
+    });
+  }
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -160,7 +193,13 @@ export default function CreateRoutine() {
           const routineId = await createRoutine(db, routineName);
 
           for (const selected of selectedExercises.values()) {
-            await createRoutineExercise(db, routineId, selected.id);
+            const routineExerciseId = await createRoutineExercise(db, routineId, selected.id);
+
+            const sets = exerciseSets.get(selected.id) ?? [];
+
+            for (const set of sets) {
+              await createSet(db, routineExerciseId, set.weight, set.reps);
+            }
           }
         }
         await saveRoutine();
@@ -172,6 +211,8 @@ export default function CreateRoutine() {
       <SelectorModal
         visible={selecting}
         exercises={exercises}
+        selectedExercises={selectedExercises}
+        onToggle={(exercise: Exercise) => toggleExercise(exercise)}
         onClose={() => setSelecting(false)}
       />
     </View>

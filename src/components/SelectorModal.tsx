@@ -6,49 +6,19 @@ import { Modal, Pressable, Text, View } from "react-native";
 
 interface SelectorModalProps {
   visible: boolean,
-  exercises: Exercise[]
+  exercises: Exercise[],
+  selectedExercises: Map<number, Exercise>,
+  onToggle: (exercise: Exercise) => void,
   onClose: () => void
 };
 
 export function SelectorModal({
   visible,
   exercises,
+  selectedExercises,
+  onToggle,
   onClose
 }: SelectorModalProps) {
-  const { selectedExercises, setSelectedExercises, setExerciseSets } = useRoutineDraftContext();
-
-  function toggleExercise(exercise: Exercise) {
-    setSelectedExercises((oldExercises) => {
-      const exerciseMap = new Map(oldExercises);
-
-      if (exerciseMap.has(exercise.id)) {
-        exerciseMap.delete(exercise.id);
-
-        setExerciseSets((oldSets) => {
-          const setMap = new Map(oldSets);
-          setMap.delete(exercise.id);
-          return setMap;
-        });
-      }
-      else {
-        exerciseMap.set(exercise.id, exercise);
-
-        setExerciseSets((oldSets) => {
-          const setMap = new Map(oldSets);
-
-          // Default sets
-          setMap.set(exercise.id, [{
-            weight: 0,
-            reps: 0
-          }]);
-
-          return setMap
-        });
-      }
-
-      return exerciseMap;
-    });
-  }
 
   return (
     <Modal
@@ -62,7 +32,7 @@ export function SelectorModal({
             <View key={exercise.id}>
               <Checkbox
                 value={selectedExercises.has(exercise.id)}
-                onValueChange={() => toggleExercise(exercise)}
+                onValueChange={() => onToggle(exercise)}
               />
               <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
             </View>

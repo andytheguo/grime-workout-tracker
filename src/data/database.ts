@@ -153,8 +153,8 @@ export async function deleteRoutineExercise(db: SQLite.SQLiteDatabase, id: numbe
   await db.runAsync("DELETE FROM routine_exercises WHERE id = ?", id);
 }
 
-export async function createSet(db: SQLite.SQLiteDatabase, routineExerciseId: number) {
-  const result = await db.runAsync("INSERT INTO sets (routine_exercise_id) VALUES (?)", routineExerciseId);
+export async function createSet(db: SQLite.SQLiteDatabase, routineExerciseId: number, weight: number = 0, reps: number = 0) {
+  const result = await db.runAsync("INSERT INTO sets (routine_exercise_id, weight, reps) VALUES (?, ?, ?)", routineExerciseId, weight, reps);
 
   return result.lastInsertRowId;
 }
