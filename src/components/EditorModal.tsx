@@ -14,7 +14,8 @@ interface EditorModalProps {
   onSaveSet: (set: ExerciseSet) => void,
   onRemoveSet: (routineExerciseId: number, setId: number) => void,
   onAddSet: (routineExerciseId: number) => void,
-  onAddExercise: (exercise: Exercise) => void
+  onAddExercise: (exercise: Exercise) => void,
+  onRemoveExercise: (routineExerciseId: number) => void
 };
 
 export function EditorModal({
@@ -26,7 +27,8 @@ export function EditorModal({
   onSaveSet,
   onRemoveSet,
   onAddSet,
-  onAddExercise
+  onAddExercise,
+  onRemoveExercise
 }: EditorModalProps) {
   const [selecting, setSelecting] = useState(false);
   const [selectedExercises, setSelectedExercises] = useState<Map<number, Exercise>>(new Map());
@@ -70,8 +72,10 @@ export function EditorModal({
 
           return (
             <View key={routineExercise.id}>
-              <Pressable>
-                <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+
+              <Pressable style={styles.button} onPress={() => onRemoveExercise(routineExercise.id)}>
+                <Text style={styles.text}>Delete Exercise</Text>
               </Pressable>
 
               {exerciseSets.map((exerciseSet, index) => (

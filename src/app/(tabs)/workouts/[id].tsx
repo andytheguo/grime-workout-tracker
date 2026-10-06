@@ -1,7 +1,7 @@
 import { EditorModal } from "@/components/EditorModal";
 import { SetRow } from "@/components/SetRow";
 import { styles } from "@/constants/styles";
-import { createRoutineExercise, createSet, deleteSet, Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise, updateSet } from "@/data/database";
+import { createRoutineExercise, createSet, deleteRoutineExercise, deleteSet, Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise, updateSet } from "@/data/database";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -117,6 +117,12 @@ export default function EditRoutine() {
     ]);
   }
 
+  async function removeExercise(routineExerciseId: number) {
+    await deleteRoutineExercise(db, routineExerciseId);
+
+    setRoutineExercises((oldRoutineExercises) => oldRoutineExercises.filter((routineExercise) => routineExercise.id !== routineExerciseId));
+  }
+
   return (
     <>
       <Stack.Screen options={{ title: routine?.name }} />
@@ -131,9 +137,7 @@ export default function EditRoutine() {
 
           return (
             <View style={{ alignItems: "center" }} key={routineExercise.id}>
-              <Pressable>
-                <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
-              </Pressable>
+              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
 
               {exerciseSets.map((exerciseSet, index) => (
                 <SetRow set={exerciseSet} index={index} key={exerciseSet.id}/>
@@ -157,6 +161,7 @@ export default function EditRoutine() {
         onRemoveSet={(routineExerciseId: number, setId: number) => removeSet(routineExerciseId, setId)}
         onAddSet={(routineExerciseId: number) => addSet(routineExerciseId)}
         onAddExercise={(exercise: Exercise) => addExercise(exercise)}
+        onRemoveExercise={(routineExerciseId: number) => removeExercise(routineExerciseId)}
       />
     </>
   );
