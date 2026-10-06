@@ -3,10 +3,11 @@ import { styles } from "@/constants/styles";
 import { createRoutine, createRoutineExercise, createSet, Exercise, getExercises } from "@/data/database";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { SelectorModal } from "@/components/SelectorModal";
 import { DraftSetEditor } from "@/components/DraftSetEditor";
+import { useFocusEffect } from "expo-router/build/react-navigation";
 
 export default function CreateRoutine() {
   const router = useRouter();
@@ -18,6 +19,11 @@ export default function CreateRoutine() {
   const [selecting, setSelecting] = useState(false);
 
   const db = useSQLiteContext();
+
+  useFocusEffect(useCallback(() => {
+    setSelectedExercises(new Map());
+    setExerciseSets(new Map());
+  }, []));
 
   useEffect(() => {
     async function setup() {

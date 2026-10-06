@@ -1,5 +1,4 @@
 import { styles } from "@/constants/styles";
-import { useRoutineDraftContext } from "@/contexts/RoutineDraftContext"
 import { Exercise } from "@/data/database"
 import Checkbox from "expo-checkbox";
 import { Modal, Pressable, Text, View } from "react-native";
