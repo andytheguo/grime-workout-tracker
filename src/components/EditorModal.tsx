@@ -21,7 +21,6 @@ interface EditorModalProps {
 export function EditorModal({
   routineExercises,
   visible,
-  exercises,
   sets,
   onClose,
   onSaveSet,
@@ -109,7 +108,6 @@ export function EditorModal({
 
       <SelectorModal
         visible={selecting}
-        exercises={exercises}
         selectedExercises={selectedExercises}
         onToggle={(exercise) => toggleExercise(exercise)}
         onClose={() => {

@@ -1,10 +1,12 @@
 import { EditorModal } from "@/components/EditorModal";
 import { SetRow } from "@/components/SetRow";
 import { styles } from "@/constants/styles";
+import { useExerciseContext } from "@/contexts/ExerciseContext";
 import { createRoutineExercise, createSet, deleteRoutineExercise, deleteSet, Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise, updateSet } from "@/data/database";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "expo-router/build/react-navigation";
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function EditRoutine() {
@@ -12,24 +14,22 @@ export default function EditRoutine() {
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [routineExercises, setRoutineExercises] = useState<RoutineExercise[]>([]);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   // Maps routineExercise ID to its sets
   const [sets, setSets] = useState<Map<number, ExerciseSet[]>>(new Map<number, ExerciseSet[]>());
   const [edit, setEdit] = useState(false);
 
+  const { exercises } = useExerciseContext();
   const db = useSQLiteContext();
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     async function loadRoutine() {
       const routineId = Number(id);
 
       const routineRes = await getRoutine(db, routineId);
       const routineExercisesRes = await getRoutineExercises(db, routineId);
-      const exercisesRes = await getExercises(db);
 
       setRoutine(routineRes);
       setRoutineExercises(routineExercisesRes);
-      setExercises(exercisesRes);
 
       const map = new Map<number, ExerciseSet[]>();
 
@@ -43,7 +43,7 @@ export default function EditRoutine() {
     }
 
     loadRoutine();
-  }, [db, id]);
+  }, [db, id]));
 
   async function saveSet(set: ExerciseSet) {
     await updateSet(db, {

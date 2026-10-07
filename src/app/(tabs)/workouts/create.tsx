@@ -15,7 +15,6 @@ export default function CreateRoutine() {
   const [name, setName] = useState("");
 
   const { selectedExercises, setSelectedExercises, exerciseSets, setExerciseSets } = useRoutineDraftContext();
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selecting, setSelecting] = useState(false);
 
   const db = useSQLiteContext();
@@ -24,14 +23,6 @@ export default function CreateRoutine() {
     setSelectedExercises(new Map());
     setExerciseSets(new Map());
   }, []));
-
-  useEffect(() => {
-    async function setup() {
-      const result = await getExercises(db);
-      setExercises(result);
-    }
-    setup();
-  }, [db]);
 
   function removeExercise(exerciseId: number) {
     setSelectedExercises((oldExercises) => {
@@ -216,7 +207,6 @@ export default function CreateRoutine() {
 
       <SelectorModal
         visible={selecting}
-        exercises={exercises}
         selectedExercises={selectedExercises}
         onToggle={(exercise: Exercise) => toggleExercise(exercise)}
         onClose={() => setSelecting(false)}

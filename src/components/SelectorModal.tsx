@@ -1,11 +1,11 @@
 import { styles } from "@/constants/styles";
+import { useExerciseContext } from "@/contexts/ExerciseContext";
 import { Exercise } from "@/data/database"
 import Checkbox from "expo-checkbox";
 import { Modal, Pressable, Text, View } from "react-native";
 
 interface SelectorModalProps {
   visible: boolean,
-  exercises: Exercise[],
   selectedExercises: Map<number, Exercise>,
   onToggle: (exercise: Exercise) => void,
   onClose: () => void
@@ -13,11 +13,11 @@ interface SelectorModalProps {
 
 export function SelectorModal({
   visible,
-  exercises,
   selectedExercises,
   onToggle,
   onClose
 }: SelectorModalProps) {
+  const { exercises } = useExerciseContext();
 
   return (
     <Modal

@@ -1,6 +1,7 @@
 import { SelectorModal } from "@/components/SelectorModal";
 import { SetLogger } from "@/components/SetLogger";
 import { styles } from "@/constants/styles";
+import { useExerciseContext } from "@/contexts/ExerciseContext";
 import { Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
@@ -16,7 +17,6 @@ export default function StartRoutine() {
   const [activeRoutineExercises, setActiveRoutineExercises] = useState<RoutineExercise[]>([]);
   const tempRoutineExerciseId = useRef(-1);
 
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   // Maps routineExercise ID to its sets
   const [activeSets, setActiveSets] = useState<Map<number, ExerciseSet[]>>(new Map<number, ExerciseSet[]>());
   const [selectedExercises, setSelectedExercises] = useState<Map<number, Exercise>>(new Map());
@@ -31,11 +31,9 @@ export default function StartRoutine() {
 
       const routineRes = await getRoutine(db, routineId);
       const routineExercisesRes = await getRoutineExercises(db, routineId);
-      const exercisesRes = await getExercises(db);
 
       setRoutine(routineRes);
       setActiveRoutineExercises(routineExercisesRes);
-      setExercises(exercisesRes);
 
       const map = new Map<number, ExerciseSet[]>();
 
@@ -206,7 +204,6 @@ export default function StartRoutine() {
 
       <SelectorModal
         visible={selecting}
-        exercises={exercises}
         selectedExercises={selectedExercises}
         onToggle={(exercise: Exercise) => toggleExercise(exercise)}
         onClose={() => {

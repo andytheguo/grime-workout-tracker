@@ -10,6 +10,7 @@ export default function EditExercise() {
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
 
+  const router = useRouter();
   const db = useSQLiteContext();
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function EditExercise() {
         <Pressable style={styles.button} onPress={async () => {
           if (exercise) {
             await updateExercise(db, { id: exercise.id, name: exercise.name });
+            router.back();
           }
         }}>
           <Text style={styles.text}>Save</Text>
