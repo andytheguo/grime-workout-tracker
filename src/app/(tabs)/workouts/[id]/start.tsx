@@ -3,12 +3,17 @@ import { SetLogger } from "@/components/SetLogger";
 import { styles } from "@/constants/styles";
 import { Exercise, ExerciseSet, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useHeaderHeight } from "expo-router/build/react-navigation";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function StartRoutine() {
   const { id } = useLocalSearchParams();
+
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
 
   const router = useRouter();
 
@@ -185,47 +190,51 @@ export default function StartRoutine() {
     <>
       <Stack.Screen options={{ title: routine?.name }} />
 
-      <View style={styles.container}>
-        {activeRoutineExercises.map((routineExercise) => {
-          const exerciseSets = activeSets.get(routineExercise.id) ?? [];
+      <SafeAreaView style={{ flex: 1, marginTop: headerHeight - insets.top }}>
+        <View style={styles.container}>
+          <ScrollView>
+            {activeRoutineExercises.map((routineExercise) => {
+              const exerciseSets = activeSets.get(routineExercise.id) ?? [];
 
-          return (
-            <View style={{ alignItems: "center" }} key={routineExercise.id}>
-              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+              return (
+                <View style={{ alignItems: "center" }} key={routineExercise.id}>
+                  <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
 
-              <Pressable style={styles.button} onPress={() => removeActiveRoutineExercise(routineExercise.id)}>
-                <Text style={styles.text}>Delete Exercise</Text>
-              </Pressable>
+                  <Pressable style={styles.button} onPress={() => removeActiveRoutineExercise(routineExercise.id)}>
+                    <Text style={styles.text}>Delete Exercise</Text>
+                  </Pressable>
 
-              {exerciseSets.map((exerciseSet, index) => (
-                <SetLogger
-                  key={exerciseSet.id}
-                  set={exerciseSet}
-                  index={index}
-                  onSave={(weight, reps) => saveActiveSet({
-                    ...exerciseSet,
-                    weight: weight,
-                    reps: reps
-                  })}
-                  onDelete={() => removeActiveSet(routineExercise.id, exerciseSet.id)}
-                />
-              ))}
+                  {exerciseSets.map((exerciseSet, index) => (
+                    <SetLogger
+                      key={exerciseSet.id}
+                      set={exerciseSet}
+                      index={index}
+                      onSave={(weight, reps) => saveActiveSet({
+                        ...exerciseSet,
+                        weight: weight,
+                        reps: reps
+                      })}
+                      onDelete={() => removeActiveSet(routineExercise.id, exerciseSet.id)}
+                    />
+                  ))}
 
-              <Pressable style={styles.button} onPress={() => addActiveSet(routineExercise.id)}>
-                <Text style={styles.text}>Add Set</Text>
-              </Pressable>
-            </View>
-          );
-        })}
+                  <Pressable style={styles.button} onPress={() => addActiveSet(routineExercise.id)}>
+                    <Text style={styles.text}>Add Set</Text>
+                  </Pressable>
+                </View>
+              );
+            })}
+          </ScrollView>
 
-        <Pressable style={styles.button} onPress={() => setSelecting(true)}>
-          <Text style={styles.text}>Add Exercise</Text>
-        </Pressable>
+          <Pressable style={[styles.button, { marginTop: 20, marginBottom: 10 }]} onPress={() => setSelecting(true)}>
+            <Text style={styles.text}>Add Exercise</Text>
+          </Pressable>
 
-        <Pressable style={styles.button} onPress={() => router.back()}>
-          <Text style={styles.text}>Finish</Text>
-        </Pressable>
-      </View>
+          <Pressable style={styles.button} onPress={() => router.back()}>
+            <Text style={styles.text}>Finish</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
 
       <SelectorModal
         visible={selecting}

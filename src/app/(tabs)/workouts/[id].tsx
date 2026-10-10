@@ -4,13 +4,16 @@ import { styles } from "@/constants/styles";
 import { useExerciseContext } from "@/contexts/ExerciseContext";
 import { createRoutineExercise, createSet, deleteRoutineExercise, deleteSet, Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise, updateSet } from "@/data/database";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useFocusEffect } from "expo-router/build/react-navigation";
+import { useFocusEffect, useHeaderHeight } from "expo-router/build/react-navigation";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EditRoutine() {
   const { id } = useLocalSearchParams();
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [routineExercises, setRoutineExercises] = useState<RoutineExercise[]>([]);
@@ -142,29 +145,33 @@ export default function EditRoutine() {
     <>
       <Stack.Screen options={{ title: routine?.name }} />
 
-      <View style={styles.container}>
-        <Pressable style={styles.button} onPress={() => setEdit(true)}>
-          <Text style={styles.text}>Edit Routine</Text>
-        </Pressable>
+      <SafeAreaView style={{ flex: 1, marginTop: headerHeight - insets.top }}>
+        <View style={styles.container}>
+          <Pressable style={[styles.button, { marginBottom: 20 }]} onPress={() => setEdit(true)}>
+            <Text style={styles.text}>Edit Routine</Text>
+          </Pressable>
 
-        {routineExercises.map((routineExercise) => {
-          const exerciseSets = sets.get(routineExercise.id) ?? [];
+          <ScrollView>
+            {routineExercises.map((routineExercise) => {
+              const exerciseSets = sets.get(routineExercise.id) ?? [];
 
-          return (
-            <View style={{ alignItems: "center" }} key={routineExercise.id}>
-              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+              return (
+                <View style={{ alignItems: "center" }} key={routineExercise.id}>
+                  <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
 
-              {exerciseSets.map((exerciseSet, index) => (
-                <SetRow set={exerciseSet} index={index} key={exerciseSet.id}/>
-              ))}
-            </View>
-          );
-        })}
+                  {exerciseSets.map((exerciseSet, index) => (
+                    <SetRow set={exerciseSet} index={index} key={exerciseSet.id}/>
+                  ))}
+                </View>
+              );
+            })}
+          </ScrollView>
 
-        <Pressable style={styles.button}>
-          <Text style={styles.text} onPress={() => router.navigate(`/workouts/${id}/start`)}>Start</Text>
-        </Pressable>
-      </View>
+          <Pressable style={[styles.button, { marginTop: 20 }]}>
+            <Text style={styles.text} onPress={() => router.navigate(`/workouts/${id}/start`)}>Start</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
 
       <EditorModal
         routineExercises={routineExercises}
