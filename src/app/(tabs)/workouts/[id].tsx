@@ -115,6 +115,21 @@ export default function EditRoutine() {
       ...oldRoutineExercises,
       newRoutineExercise
     ]);
+
+    const setId = await createSet(db, routineExerciseId);
+
+    const newSet: ExerciseSet = {
+      id: setId,
+      weight: 0,
+      reps: 0,
+      routineExerciseId: routineExerciseId
+    };
+
+    setSets((oldSets) => {
+      const map = new Map(oldSets);
+      map.set(routineExerciseId, [newSet]);
+      return map;
+    });
   }
 
   async function removeExercise(routineExerciseId: number) {

@@ -1,8 +1,7 @@
 import { SelectorModal } from "@/components/SelectorModal";
 import { SetLogger } from "@/components/SetLogger";
 import { styles } from "@/constants/styles";
-import { useExerciseContext } from "@/contexts/ExerciseContext";
-import { Exercise, ExerciseSet, getExercises, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
+import { Exercise, ExerciseSet, getRoutine, getRoutineExercises, getSets, Routine, RoutineExercise } from "@/data/database";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +14,7 @@ export default function StartRoutine() {
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [activeRoutineExercises, setActiveRoutineExercises] = useState<RoutineExercise[]>([]);
-  const tempRoutineExerciseId = useRef(-1);
+  const tempId = useRef(-1);
 
   // Maps routineExercise ID to its sets
   const [activeSets, setActiveSets] = useState<Map<number, ExerciseSet[]>>(new Map<number, ExerciseSet[]>());
@@ -120,7 +119,9 @@ export default function StartRoutine() {
 
   function addActiveRoutineExercise(exercise: Exercise) {
     const routineId = Number(id);
-    const routineExerciseId = tempRoutineExerciseId.current--;
+
+    const routineExerciseId = tempId.current--;
+    const setId = tempId.current--;
 
     const newRoutineExercise: RoutineExercise = {
       id: routineExerciseId,
@@ -133,6 +134,19 @@ export default function StartRoutine() {
       ...oldExercises,
       newRoutineExercise
     ]);
+
+    const newSet: ExerciseSet = {
+      id: setId,
+      weight: 0,
+      reps: 0,
+      routineExerciseId: routineExerciseId
+    };
+
+    setActiveSets((oldSets) => {
+      const map = new Map(oldSets);
+      map.set(routineExerciseId, [newSet]);
+      return map;
+    });
   }
 
   function toggleExercise(exercise: Exercise) {
@@ -158,6 +172,15 @@ export default function StartRoutine() {
     setSelectedExercises(new Map());
   }
 
+  function removeActiveRoutineExercise(routineExerciseId: number) {
+    setActiveRoutineExercises((oldExercises) => oldExercises.filter((routineExercise) => routineExercise.id !== routineExerciseId));
+    setActiveSets((oldSets) => {
+      const map = new Map(oldSets);
+      map.delete(routineExerciseId);
+      return map;
+    })
+  }
+
   return (
     <>
       <Stack.Screen options={{ title: routine?.name }} />
@@ -168,8 +191,10 @@ export default function StartRoutine() {
 
           return (
             <View style={{ alignItems: "center" }} key={routineExercise.id}>
-              <Pressable>
-                <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+              <Text style={{ fontSize: 25 }}>{routineExercise.name}</Text>
+
+              <Pressable style={styles.button} onPress={() => removeActiveRoutineExercise(routineExercise.id)}>
+                <Text style={styles.text}>Delete Exercise</Text>
               </Pressable>
 
               {exerciseSets.map((exerciseSet, index) => (
