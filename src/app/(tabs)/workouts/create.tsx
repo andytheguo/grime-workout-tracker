@@ -3,14 +3,18 @@ import { styles } from "@/constants/styles";
 import { createRoutine, createRoutineExercise, createSet, Exercise, getExercises } from "@/data/database";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { useCallback, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SelectorModal } from "@/components/SelectorModal";
 import { DraftSetEditor } from "@/components/DraftSetEditor";
-import { useFocusEffect } from "expo-router/build/react-navigation";
+import { useFocusEffect, useHeaderHeight } from "expo-router/build/react-navigation";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CreateRoutine() {
   const router = useRouter();
+
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
 
   const [name, setName] = useState("");
 
@@ -133,84 +137,89 @@ export default function CreateRoutine() {
   }
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        placeholderTextColor="white"
-        onChangeText={(text) => setName(text)}
-        value={name}
-        style={{
-          width: 300,
-          height: 50,
-          backgroundColor: "black",
-          color: "white"
-        }}
-      />
+    <SafeAreaView style={{ flex: 1, marginTop: headerHeight - insets.top }}>
+      <View style={styles.container}>
+        <TextInput
+          placeholderTextColor="white"
+          onChangeText={(text) => setName(text)}
+          value={name}
+          style={{
+            width: 300,
+            height: 50,
+            backgroundColor: "black",
+            color: "white",
+            marginBottom: 10
+          }}
+        />
 
-      <Pressable style={styles.button} onPress={() => setSelecting(true)}>
-        <Text style={styles.text}>Add Exercises</Text>
-      </Pressable>
+        <Pressable style={[styles.button, { marginBottom: 5 }]} onPress={() => setSelecting(true)}>
+          <Text style={styles.text}>Add Exercises</Text>
+        </Pressable>
 
-      <Text style={{ fontSize: 25 }}>Your Exercises</Text>
+        <Text style={{ fontSize: 25, marginBottom: 20 }}>Your Exercises</Text>
 
-      {Array.from(selectedExercises.values()).map((exercise, index) => {
-        const sets = exerciseSets.get(exercise.id) ?? [];
+        <ScrollView>
+          {Array.from(selectedExercises.values()).map((exercise, index) => {
+            const sets = exerciseSets.get(exercise.id) ?? [];
 
-        return (
-          <View key={exercise.id}>
-            <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
-            <Pressable
-              style={styles.button}
-              onPress={() => removeExercise(exercise.id)}
-            >
-              <Text style={styles.text}>Delete</Text>
-            </Pressable>
+            return (
+              <View key={exercise.id}>
+                <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
+                <Pressable
+                  style={styles.button}
+                  onPress={() => removeExercise(exercise.id)}
+                >
+                  <Text style={styles.text}>Delete</Text>
+                </Pressable>
 
-            {sets.map((set, index) => (
-              <DraftSetEditor
-                key={index}
-                set={set}
-                index={index}
-                onSave={(weight, reps) => saveDraftSet(exercise.id, index, weight, reps)}
-                onDelete={() => removeDraftSet(exercise.id, index)}
-              />
-            ))}
+                {sets.map((set, index) => (
+                  <DraftSetEditor
+                    key={index}
+                    set={set}
+                    index={index}
+                    onSave={(weight, reps) => saveDraftSet(exercise.id, index, weight, reps)}
+                    onDelete={() => removeDraftSet(exercise.id, index)}
+                  />
+                ))}
 
-            <Pressable style={styles.button} onPress={() => addDraftSet(exercise.id)}>
-              <Text style={styles.text}>Add Set</Text>
-            </Pressable>
-          </View>);
-        })}
+                <Pressable style={styles.button} onPress={() => addDraftSet(exercise.id)}>
+                  <Text style={styles.text}>Add Set</Text>
+                </Pressable>
+              </View>);
+            })}
+        </ScrollView>
 
-      <Pressable style={styles.button} onPress={async () => {
-        async function saveRoutine() {
-          const routineName = name.trim();
+        <Pressable style={[styles.button, { marginTop: 20 }]} onPress={async () => {
+          async function saveRoutine() {
+            const routineName = name.trim();
 
-          if (routineName.trim() === "") return;
+            if (routineName.trim() === "") return;
 
-          const routineId = await createRoutine(db, routineName);
+            const routineId = await createRoutine(db, routineName);
 
-          for (const selected of selectedExercises.values()) {
-            const routineExerciseId = await createRoutineExercise(db, routineId, selected.id);
+            for (const selected of selectedExercises.values()) {
+              const routineExerciseId = await createRoutineExercise(db, routineId, selected.id);
 
-            const sets = exerciseSets.get(selected.id) ?? [];
+              const sets = exerciseSets.get(selected.id) ?? [];
 
-            for (const set of sets) {
-              await createSet(db, routineExerciseId, set.weight, set.reps);
+              for (const set of sets) {
+                await createSet(db, routineExerciseId, set.weight, set.reps);
+              }
             }
           }
-        }
-        await saveRoutine();
-        router.back();
-      }}>
-        <Text style={styles.text}>Save</Text>
-      </Pressable>
+          await saveRoutine();
+          router.back();
+        }}>
+          <Text style={styles.text}>Save</Text>
+        </Pressable>
 
-      <SelectorModal
-        visible={selecting}
-        selectedExercises={selectedExercises}
-        onToggle={(exercise: Exercise) => toggleExercise(exercise)}
-        onClose={() => setSelecting(false)}
-      />
-    </View>
+        <SelectorModal
+          visible={selecting}
+          selectedExercises={selectedExercises}
+          onToggle={(exercise: Exercise) => toggleExercise(exercise)}
+          onClose={() => setSelecting(false)}
+        />
+      </View>
+    </SafeAreaView>
   );
 }

@@ -2,7 +2,9 @@ import { styles } from "@/constants/styles";
 import { useExerciseContext } from "@/contexts/ExerciseContext";
 import { Exercise } from "@/data/database"
 import Checkbox from "expo-checkbox";
-import { Modal, Pressable, Text, View } from "react-native";
+import { useHeaderHeight } from "expo-router/build/react-navigation";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface SelectorModalProps {
   visible: boolean,
@@ -25,23 +27,29 @@ export function SelectorModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        {exercises.map((exercise) => {
-          return (
-            <View key={exercise.id}>
-              <Checkbox
-                value={selectedExercises.has(exercise.id)}
-                onValueChange={() => onToggle(exercise)}
-              />
-              <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
-            </View>
-          );
-        })}
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text style={{ fontSize: 25, marginBottom: 20 }}>Exercises:</Text>
 
-        <Pressable style={styles.button} onPress={onClose}>
-          <Text style={styles.text}>Done</Text>
-        </Pressable>
-      </View>
+          <ScrollView>
+            {exercises.map((exercise) => {
+              return (
+                <View key={exercise.id}>
+                  <Checkbox
+                    value={selectedExercises.has(exercise.id)}
+                    onValueChange={() => onToggle(exercise)}
+                  />
+                  <Text style={{ fontSize: 25 }}>{exercise.name}</Text>
+                </View>
+              );
+            })}
+          </ScrollView>
+
+          <Pressable style={styles.button} onPress={onClose}>
+            <Text style={styles.text}>Done</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     </Modal>
   );
 }
